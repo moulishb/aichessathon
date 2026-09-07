@@ -1,11 +1,16 @@
 """The submission entrypoint. The platform imports this file and calls get_move."""
 
 import time
+from typing import NamedTuple
 
 import chess
 
 # Constants
 INF = 200000
+MAX_QUIESCENCE_PLY = 8
+EXACT = 0
+LOWERBOUND = 1
+UPPERBOUND = 2
 
 
 class SearchTimeout(Exception):
@@ -212,21 +217,26 @@ def evaluate_king_safety(board: chess.Board, color: bool) -> int:
     if king_sq is None:
         return 0
 
-    # Castling rights
-    if color == chess.WHITE:
-        if board.has_kingside_castling_rights(chess.WHITE):
-            score += 30
-        if board.has_queenside_castling_rights(chess.WHITE):
-            score += 30
-    else:
-        if board.has_kingside_castling_rights(chess.BLACK):
-            score += 30
-        if board.has_queenside_castling_rights(chess.BLACK):
-            score += 30
+    # Reward an actually castled king and the pawns shielding it. Castling
+    # rights alone are only potential and disappear when castling succeeds.
+    home_rank = 0 if color == chess.WHITE else 7
+    shield_rank = 1 if color == chess.WHITE else 6
+    king_file = chess.square_file(king_sq)
+    if chess.square_rank(king_sq) == home_rank and king_file in (2, 6):
+        score += 30
+        for file_offset in (-1, 0, 1):
+            shield_file = king_file + file_offset
+            if 0 <= shield_file < 8:
+                shield = board.piece_at(chess.square(shield_file, shield_rank))
+                if shield == chess.Piece(chess.PAWN, color):
+                    score += 8
+
+    # Penalize enemy control around the king.
+    king_zone = chess.SquareSet(chess.BB_KING_ATTACKS[king_sq] | chess.BB_SQUARES[king_sq])
+    score -= 5 * sum(board.is_attacked_by(not color, sq) for sq in king_zone)
 
     # King in centre (bad in middlegame, good in endgame)
     if not is_endgame_position(board):
-        king_file = chess.square_file(king_sq)
         king_rank = chess.square_rank(king_sq)
         centre_distance = abs(king_file - 3.5) + abs(king_rank - 3.5)
         if centre_distance < 3:
@@ -305,26 +315,16 @@ def is_isolated_pawn(board: chess.Board, sq: int, color: bool) -> bool:
 # ==============================================================================
 
 def order_moves(
-    board: chess.Board, moves: list[chess.Move]
+    board: chess.Board,
+    moves: list[chess.Move],
+    preferred_move: chess.Move | None = None,
 ) -> list[chess.Move]:
-    """Order moves using MVV-LVA and other heuristics."""
+    """Order moves cheaply, putting a known principal-variation move first."""
 
-    def move_score(move: chess.Move) -> tuple[int, int]:
-        # Checkmate moves first
-        board.push(move)
-        is_checkmate = board.is_checkmate()
-        board.pop()
-        if is_checkmate:
-            return (-4, 0)
+    def move_score(move: chess.Move) -> int:
+        if move == preferred_move:
+            return 1_000_000
 
-        # Checks second
-        board.push(move)
-        is_check = board.is_check()
-        board.pop()
-        if is_check:
-            return (-3, 0)
-
-        # Captures: MVV/LVA (Most Valuable Victim / Least Valuable Attacker)
         if board.is_capture(move):
             attacker = board.piece_at(move.from_square)
             assert attacker is not None
@@ -338,21 +338,30 @@ def order_moves(
                 )
 
             attacker_value = PIECE_VALUES[attacker.piece_type]
-            return (-2, -victim_value + attacker_value // 32)
+            # MVV-LVA puts high-value victims captured by low-value attackers first.
+            return 100_000 + victim_value * 16 - attacker_value
 
-        # Promotions
         if move.promotion:
-            return (-1, 0)
+            return 90_000 + PIECE_VALUES[move.promotion]
 
-        # Quiet moves
-        return (0, 0)
+        if board.gives_check(move):
+            return 50_000
 
-    return sorted(moves, key=move_score)
+        return 0
+
+    return sorted(moves, key=move_score, reverse=True)
 
 
 # ==============================================================================
 # NEGAMAX WITH ALPHA-BETA PRUNING
 # ==============================================================================
+
+class TTEntry(NamedTuple):
+    depth: int
+    score: int
+    flag: int
+    best_move: chess.Move | None
+
 
 class SearchState:
     def __init__(self) -> None:
@@ -360,6 +369,7 @@ class SearchState:
         self.start_time = 0.0
         self.time_budget_ms = 0.0
         self.last_completed_move: chess.Move | None = None
+        self.transposition_table: dict[tuple[object, int], TTEntry] = {}
 
     def should_stop(self) -> bool:
         """Check if we should stop searching."""
@@ -372,8 +382,61 @@ class SearchState:
         """Reset search state for a new search."""
         self.nodes_searched = 0
 
+    def check_timeout(self) -> None:
+        """Interrupt periodically without paying for a clock read at every node."""
+        if (self.nodes_searched & 1023) == 0 and self.should_stop():
+            raise SearchTimeout
+
 
 search_state = SearchState()
+
+
+def position_key(board: chess.Board) -> tuple[object, int]:
+    """Return a compact TT key, including the fifty-move state."""
+    return (board._transposition_key(), board.halfmove_clock)
+
+
+def quiescence(
+    board: chess.Board,
+    alpha: int,
+    beta: int,
+    ply: int = 0,
+) -> int:
+    """Search forcing moves until the position is tactically quiet."""
+    search_state.check_timeout()
+    search_state.nodes_searched += 1
+
+    if board.is_game_over():
+        return evaluate(board)
+
+    in_check = board.is_check()
+    if ply >= MAX_QUIESCENCE_PLY:
+        return evaluate(board)
+
+    if not in_check:
+        stand_pat = evaluate(board)
+        if stand_pat >= beta:
+            return beta
+        if stand_pat > alpha:
+            alpha = stand_pat
+
+    moves = list(board.legal_moves)
+    if not in_check:
+        moves = [move for move in moves if board.is_capture(move) or move.promotion]
+
+    for move in order_moves(board, moves):
+        board.push(move)
+        try:
+            score = -quiescence(board, -beta, -alpha, ply + 1)
+        finally:
+            board.pop()
+
+        if score >= beta:
+            return beta
+        if score > alpha:
+            alpha = score
+
+    return alpha
 
 
 def negamax(
@@ -387,18 +450,33 @@ def negamax(
     Returns the score from the perspective of the side to move.
     Positive = advantage; Negative = disadvantage.
     """
-    # Check time periodically
-    if (search_state.nodes_searched & 1023 == 0) and search_state.should_stop():
-        raise SearchTimeout
-
+    search_state.check_timeout()
     search_state.nodes_searched += 1
 
-    # Terminal nodes
-    if depth == 0 or board.is_game_over():
+    if board.is_game_over():
         return evaluate(board)
+    if depth == 0:
+        return quiescence(board, alpha, beta)
+
+    key = position_key(board)
+    alpha_original = alpha
+    entry = search_state.transposition_table.get(key)
+    preferred_move: chess.Move | None = None
+    if entry is not None:
+        preferred_move = entry.best_move
+        if entry.depth >= depth:
+            if entry.flag == EXACT:
+                return entry.score
+            if entry.flag == LOWERBOUND:
+                alpha = max(alpha, entry.score)
+            else:
+                beta = min(beta, entry.score)
+            if alpha >= beta:
+                return entry.score
 
     best = -INF
-    moves = order_moves(board, list(board.legal_moves))
+    best_move: chess.Move | None = None
+    moves = order_moves(board, list(board.legal_moves), preferred_move)
 
     for move in moves:
         board.push(move)
@@ -412,12 +490,22 @@ def negamax(
 
         if score > best:
             best = score
+            best_move = move
 
         if score > alpha:
             alpha = score
 
         if alpha >= beta:
             break
+
+    flag = EXACT
+    if best <= alpha_original:
+        flag = UPPERBOUND
+    elif best >= beta:
+        flag = LOWERBOUND
+    old_entry = search_state.transposition_table.get(key)
+    if old_entry is None or depth >= old_entry.depth:
+        search_state.transposition_table[key] = TTEntry(depth, best, flag, best_move)
 
     return best
 
@@ -431,15 +519,20 @@ def find_best_move(
     """
     search_state.start_time = time.monotonic()
     search_state.time_budget_ms = time_budget_ms
-    best_move: chess.Move | None = None
+    search_state.transposition_table.clear()
+    moves = order_moves(board, list(board.legal_moves))
+    best_move: chess.Move | None = moves[0] if moves else None
 
     for depth in range(1, max_depth + 1):
         try:
             search_state.reset_for_search()
-            moves = order_moves(board, list(board.legal_moves))
+            root_entry = search_state.transposition_table.get(position_key(board))
+            preferred_move = root_entry.best_move if root_entry is not None else best_move
+            moves = order_moves(board, list(board.legal_moves), preferred_move)
 
             best_depth_move: chess.Move | None = None
             best_depth_score = -INF
+            alpha = -INF
 
             for move in moves:
                 if search_state.should_stop():
@@ -447,17 +540,26 @@ def find_best_move(
 
                 board.push(move)
                 try:
-                    score = -negamax(board, depth - 1, -INF, INF)
+                    score = -negamax(board, depth - 1, -INF, -alpha)
                 finally:
                     board.pop()
 
                 if score > best_depth_score:
                     best_depth_score = score
                     best_depth_move = move
+                if score > alpha:
+                    alpha = score
 
             # Reaching here means every root move completed successfully.
             if best_depth_move is not None:
                 best_move = best_depth_move
+                search_state.transposition_table[position_key(board)] = TTEntry(
+                    depth, best_depth_score, EXACT, best_depth_move
+                )
+                print(
+                    f"depth={depth}, nodes={search_state.nodes_searched}, "
+                    f"best={best_depth_move}, score={best_depth_score}"
+                )
 
         except SearchTimeout:
             # Timeout at this depth; use result from previous depth
@@ -527,7 +629,6 @@ def get_move(fen: str, time_left_ms: int) -> str:
     best_move = find_best_move(board, max_depth, search_time_ms)
 
     if best_move is None:
-        # Fallback to first legal move
-        best_move = legal_moves[0]
+        best_move = order_moves(board, legal_moves)[0]
 
     return best_move.uci()
