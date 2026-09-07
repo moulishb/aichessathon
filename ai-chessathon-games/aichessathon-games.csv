@@ -1,0 +1,20 @@
+round,colour,opponent,result,termination,init_s,moves,time_used_s,slowest_s,fastest_s,average_s,clock_left_s,machine,finished_at
+Rated 58,White,Golden Guys,Loss,Checkmate,0.6,33,38.9,1.6,0.0,1.2,97.6,w-0527f7,2026-09-07T19:40:17.855175+00:00
+Rated 57,White,Zugzwang Rickwar,Draw,Threefold repetition,0.7,64,73.5,1.6,0.4,1.1,78.5,w-aad8d8,2026-09-07T18:40:55.260316+00:00
+Rated 56,Black,The Italian,Loss,Checkmate,0.5,47,49.8,1.5,0.0,1.1,93.7,w-04a164,2026-09-07T17:39:57.107925+00:00
+Rated 55,Black,The W in Woxbridge,Draw,Threefold repetition,0.7,38,50.5,1.6,0.0,1.3,88.5,w-69aab8,2026-09-07T16:39:09.85189+00:00
+Rated 54,Black,Stockfish,Win,Checkmate,0.7,33,44.9,1.6,0.2,1.4,91.6,w-aad8d8,2026-09-07T15:38:16.510439+00:00
+Rated 53,White,PlayOps,Draw,Threefold repetition,0.5,24,33.5,1.5,1.4,1.4,98.5,w-b524ed,2026-09-07T14:39:55.902384+00:00
+Rated 52,White,Sweat,Win,Checkmate,0.6,24,31.0,1.6,0.2,1.3,101.0,w-26abaf,2026-09-07T13:38:54.959878+00:00
+Rated 51,White,True Prince of Imperial,Draw,Threefold repetition,0.6,27,39.0,1.6,1.4,1.4,94.5,w-2131a2,2026-09-07T12:38:56.540469+00:00
+Rated 50,Black,N0t_an_agent,Loss,Checkmate,0.7,42,46.0,1.6,0.0,1.1,95.0,w-2131a2,2026-09-07T11:39:48.843077+00:00
+Rated 49,Black,Chessbuster 9000,Draw,Threefold repetition,0.5,26,23.3,1.5,0.0,0.9,109.7,w-0a44b0,2026-09-07T10:38:35.453388+00:00
+Rated 48,Black,Alpha,Loss,Checkmate,0.6,37,48.7,1.6,0.0,1.3,89.8,w-4005df,2026-09-07T09:38:51.037398+00:00
+Rated 47,White,Egill40,Draw,Threefold repetition,0.7,38,51.2,1.6,0.0,1.3,87.8,w-2131a2,2026-09-07T08:36:23.396584+00:00
+Rated 46,White,Magnus Force,Win,Checkmate,0.5,34,43.7,1.5,0.1,1.3,93.3,w-4005df,2026-09-07T07:38:02.41793+00:00
+Rated 45,Black,Check m8,Win,Checkmate,0.5,28,36.9,1.6,0.2,1.3,97.1,w-0755a4,2026-09-06T21:34:19.866311+00:00
+Rated 44,White,Buddy's Grill Gambit,Loss,Checkmate,0.5,43,53.4,1.5,0.0,1.2,88.1,w-f93023,2026-09-06T20:36:06.955353+00:00
+Rated 43,White,Zack,Loss,Checkmate,0.5,32,41.1,1.6,0.0,1.3,94.9,w-d354c5,2026-09-06T19:34:51.391485+00:00
+Rated 42,Black,ACESOFSPADES,Loss,Checkmate,0.6,15,19.7,1.5,0.0,1.3,107.8,w-235788,2026-09-06T18:30:40.571572+00:00
+Rated 41,White,NotGothamChess,Loss,Checkmate,0.5,28,35.1,1.5,0.0,1.3,98.9,w-5d6f85,2026-09-06T17:27:48.771104+00:00
+Rated 40,Black,The Knight Shift,Loss,Checkmate,0.5,10,0.0,0.0,0.0,0.0,125.0,w-03daa0,2026-09-06T16:22:40.996572+00:00
