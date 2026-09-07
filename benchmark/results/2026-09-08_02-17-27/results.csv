@@ -1,0 +1,11 @@
+opponent,game,colour,opening,result,termination,plies
+random,1,white,startpos,win,checkmate,25
+random,2,black,startpos,win,checkmate,20
+random,3,white,Italian,win,checkmate,43
+random,4,black,Italian,win,checkmate,34
+random,5,white,QueensGambit,win,checkmate,45
+random,6,black,QueensGambit,win,checkmate,50
+random,7,white,Sicilian,win,checkmate,23
+random,8,black,Sicilian,win,checkmate,24
+random,9,white,French,win,checkmate,43
+random,10,black,French,win,checkmate,28

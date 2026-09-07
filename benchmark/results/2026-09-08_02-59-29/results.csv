@@ -1,0 +1,16 @@
+opponent,game,colour,opening,result,termination,plies
+stockfish-1320,1,white,startpos,loss,checkmate,40
+stockfish-1320,2,black,startpos,loss,checkmate,55
+stockfish-1320,3,white,Italian,loss,checkmate,48
+stockfish-1320,4,black,Italian,loss,checkmate,39
+stockfish-1320,5,white,QueensGambit,loss,checkmate,44
+stockfish-1320,6,black,QueensGambit,loss,checkmate,43
+stockfish-1320,7,white,Sicilian,loss,checkmate,62
+stockfish-1320,8,black,Sicilian,loss,checkmate,37
+stockfish-1320,9,white,French,loss,checkmate,40
+stockfish-1320,10,black,French,loss,checkmate,47
+stockfish-1320,11,white,CaroKann,loss,checkmate,102
+stockfish-1320,12,black,CaroKann,loss,checkmate,33
+stockfish-1320,13,white,startpos,loss,checkmate,34
+stockfish-1320,14,black,startpos,loss,checkmate,49
+stockfish-1320,15,white,Italian,loss,checkmate,56

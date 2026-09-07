@@ -1,0 +1,11 @@
+{
+  "suite": "quick",
+  "agent": "/home/xen/Desktop/aichessathon",
+  "previous": "/home/xen/Desktop/aichessathon/benchmark/agents/v3/agent.py",
+  "base_ms": 2000,
+  "increment_ms": 500,
+  "opponents": {
+    "stockfish-1320": 10
+  },
+  "skipped": {}
+}

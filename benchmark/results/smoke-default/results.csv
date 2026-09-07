@@ -1,0 +1,5 @@
+opponent,game,colour,opening,result,termination,plies
+random,1,white,startpos,win,checkmate,17
+random,2,black,startpos,win,checkmate,32
+random,3,white,Italian,win,checkmate,49
+random,4,black,Italian,win,checkmate,28

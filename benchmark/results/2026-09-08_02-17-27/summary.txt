@@ -1,0 +1,11 @@
+========================================================================
+CHESSATHON ENGINE BENCHMARK
+========================================================================
+Opponent              Rating     W   D   L   Score   Elo diff   Perf
+------------------------------------------------------------------------
+random                unknown  10   0   0  100.0%      +1200       -
+
+random: white score 100.0%, black score 100.0%, average length 33.5 plies
+Elo differences are estimates from this match result, clipped at 0.1/99.9%.
+Ratings are local engine settings, not Chessathon, Chess.com, or Lichess Elo.
+Average thinking time: unavailable from the current harness.

@@ -1,0 +1,11 @@
+========================================================================
+CHESSATHON ENGINE BENCHMARK
+========================================================================
+Opponent              Rating     W   D   L   Score   Elo diff   Perf
+------------------------------------------------------------------------
+stockfish-1320           1320  15   2  13   53.3%        +23    1343
+
+stockfish-1320: white score 63.3%, black score 43.3%, average length 102.7 plies
+Elo differences are estimates from this match result, clipped at 0.1/99.9%.
+Ratings are local engine settings, not Chessathon, Chess.com, or Lichess Elo.
+Average thinking time: unavailable from the current harness.

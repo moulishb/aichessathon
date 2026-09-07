@@ -1,0 +1,10 @@
+========================================================================
+CHESSATHON ENGINE BENCHMARK
+========================================================================
+Opponent              Rating     W   D   L   Score   Elo diff   Perf
+------------------------------------------------------------------------
+random                unknown   4   0   0  100.0%      +1200       -
+
+Elo differences are estimates from this match result, clipped at 0.1/99.9%.
+Ratings are local engine settings, not Chessathon, Chess.com, or Lichess Elo.
+Average thinking time: unavailable from the current harness.

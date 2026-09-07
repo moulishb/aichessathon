@@ -1,0 +1,17 @@
+[
+  {
+    "opponent": "stockfish-1320",
+    "rating": 1320,
+    "rating_note": "Stockfish UCI_Elo setting; not Chessathon/online Elo",
+    "games": 2,
+    "wins": 0,
+    "draws": 1,
+    "losses": 1,
+    "white_score": 0.5,
+    "black_score": 0.0,
+    "average_plies": 163.0,
+    "estimated_elo_difference": -190.84850188786498,
+    "estimated_performance_rating": 1129.151498112135,
+    "score": 0.25
+  }
+]

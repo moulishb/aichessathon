@@ -1,0 +1,9 @@
+[
+  {
+    "name": "R40 hanging queen",
+    "fen": "rnbq1rk1/pp2bppp/4pn2/2ppN3/2P5/3P2P1/PP2PPBP/RNBQ1RK1 b - - 0 7",
+    "category": "tactics",
+    "bad_moves": ["d8d7"],
+    "notes": "Qd7 allowed Nxd7 in the historical loss"
+  }
+]

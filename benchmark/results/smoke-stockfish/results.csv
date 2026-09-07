@@ -1,0 +1,3 @@
+opponent,game,colour,opening,result,termination,plies
+stockfish-1320,1,white,startpos,draw,threefold_repetition,185
+stockfish-1320,2,black,startpos,loss,checkmate,141
